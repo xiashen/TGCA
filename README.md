@@ -2,7 +2,7 @@
 Total genetic contribution assessment (TGCA) based on genome-wide summary association statistics.
 
 
-# Statistical Modeling
+### Statistical Modeling
 The TGCA analysis models the Z statistics from genome-wide association studies (GWAS) for each single genetic variant as drawn from a mixture of:
 
 ![](http://www.sciweavers.org/upload/Tex2Img_1595584297/eqn.png)
@@ -13,7 +13,7 @@ and thereafter makes inference on the TGCA parameter:
 
 assessing the total genetic contribution of the variant on the analyzed set of phenotypes.
 
-# Setup
+### Setup
 In order to perform a TGCA analysis in **R**, we recommend installing the **mixtools** package:
 ```{r}
 install.packages('mixtools')
@@ -24,7 +24,7 @@ install.packages('numDeriv')
 ```
 for standard error calculation.
 
-# Example
+### Example
 
 The link to our whole-genome TGCA analysis results is provided in our paper. 
 Here using the top SNPs of the two loci _HLA-B_ and _SSH2_, we show how the TGCA inference can be reproduced based on [UK Biobank GWAS results by the Neale's lab](http://www.nealelab.is/uk-biobank).
@@ -43,7 +43,7 @@ Now we can apply the mixture model to the `Zstar` values for each of the two loc
 
 # Phenotypic correlations
 
-# Reference
+### Reference
 
 Li T, Ning Z, Yang Z, Zhai R, Xu W, Ying K, Wang Y, Chen Y, Shen X (2020) _Submitted_.
 
