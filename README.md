@@ -39,11 +39,63 @@ which can be used to adjust for the phenotypic correlations across the Z statist
 Z <- as.matrix(readRDS('HLA_SSH2_1376z.rds'))
 Zstar <- Z %*% L
 ```
-Now we can apply the mixture model to the `Zstar` values for each of the two loci: 
+The `L` matrix can be applied to any variant in the genome for the 1,376 phenotypes. Now we apply the mixture model to the `Zstar` values for the _HLA-B_ locus: 
+```{r}
+require(mixtools)
+m1 <- normalmixEM(Zstar['6:31321915:A:G',], lambda = c(.25, .5, .25), mu = c(-1, 0, 1), sigma = c(2, 1, 2), 
+                  mean.constr = c(NA, 0, NA), sd.constr = c(NA, 1, NA), maxit = 9999)
+```
+The proportions of mixtures, ![](http://www.sciweavers.org/upload/Tex2Img_1595589650/eqn.png), are estimated as:
+```{r}
+m1$lambda
+## [1] 0.19730629 0.49617946 0.30651425
+```
+and the means and variances of genetic effects as:
+```{r}
+m1$mu[-2]
+## [1] -2.4391990  2.6229547
+m1$sigma[-2]
+## [1] 0.72591854 1.20545231
+```
+So that the TGCA parameter is:
+```{r}
+sum(abs(m1$lambda[-2]*m1$mu[-2]))
+## [1] 1.2852423
+```
 
-# Phenotypic correlations
+The standard error of these parameters can be derived from the log-likelihood of the mixture distribution:
+```{r}
+mixture.loglik <- function(param, X) {
+    lambda <- param[1:3]
+    mu <- param[c(4,5)]
+    sigma <- param[c(6,7)]
+    L = matrix(NA, nrow = length(X), ncol = 3)
+    L[,1] = dnorm(X, mean = mu[1], sd = sigma[1])
+    L[,2] = dnorm(X, mean = 0, sd = 1)
+    L[,3] = dnorm(X, mean = mu[2], sd = sigma[2])
+    L[,1] = L[,1]*lambda[1]
+    L[,2] = L[,2]*lambda[2]
+    L[,3] = L[,3]*lambda[3]
+    return(sum(log(rowSums(L))))
+}
+```
+where `param` is the vector containing the seven parameters in the model. The standard errors are derived as:
+```{r}
+require(numDeriv)
+H <- hessian(mixture.loglik, param)
+se <- diag(sqrt(solve(-H)))
+```
+Approximating the standard error of the TGCA parameter via Delta method, we have:
+```{r}
+vXY <- function(mX, mY, vX, vY) mX**2*vY + mY**2*vX + vX*vY
+sqrt(vXY(m1$lambda[1], m1$mu[1], se[1]**2, se[4]**2) + vXY(m1$lambda[3], m1$mu[3], se[3]**2, se[5]**2))
+```
 
 ### Reference
 
-Li T, Ning Z, Yang Z, Zhai R, Xu W, Ying K, Wang Y, Chen Y, Shen X (2020) _Submitted_.
+Li T, Ning Z, Yang Z, Zhai R, Xu W, Ying K, Wang Y, Chen Y, Shen X (2020). Total genetic contribution assessment across the human genome. _Submitted_.
+
+### Contact
+
+If you have questions, please feel free to email xia (dot) shen (at) ed (dot) ac (dot) uk.
 
