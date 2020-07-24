@@ -65,7 +65,7 @@ sum(abs(m1$lambda[-2]*m1$mu[-2]))
 
 The standard error of these parameters can be derived from the log-likelihood of the mixture distribution:
 ```{r}
-mixture.loglik <- function(param, X) {
+mixture.loglik <- function(param, X = m1$x) {
     lambda <- param[1:3]
     mu <- param[c(4,5)]
     sigma <- param[c(6,7)]
@@ -82,13 +82,20 @@ mixture.loglik <- function(param, X) {
 where `param` is the vector containing the seven parameters in the model. The standard errors are derived as:
 ```{r}
 require(numDeriv)
+param <- c(m1$lambda, m1$mu[-2], m1$sigma[-2])
 H <- hessian(mixture.loglik, param)
-se <- diag(sqrt(solve(-H)))
+se <- sqrt(diag(solve(-H)))
 ```
 Approximating the standard error of the TGCA parameter via Delta method, we have:
 ```{r}
 vXY <- function(mX, mY, vX, vY) mX**2*vY + mY**2*vX + vX*vY
 sqrt(vXY(m1$lambda[1], m1$mu[1], se[1]**2, se[4]**2) + vXY(m1$lambda[3], m1$mu[3], se[3]**2, se[5]**2))
+## [1] 0.21734431
+```
+and the Wald test p-value of:
+```{r}
+pchisq(1.2852423**2/0.21734431**2, 1, lower.tail = FALSE)
+## [1] 3.3513147e-09
 ```
 
 ### Reference
