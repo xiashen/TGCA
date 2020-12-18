@@ -14,7 +14,7 @@ and thereafter makes inference on the TGCA parameter:
 assessing the total genetic contribution of the variant on the analyzed set of phenotypes.
 
 ## Setup
-Start by installing the **TGCA** R package. We recommend directly install from GitHub via:
+Start by installing the **TGCA** R package (v 1.0-0 tested), which works on all popular platforms including Windows, macOS, and Linux. We recommend directly install from GitHub via:
 ```{r}
 require(devtools)
 install_github('https://github.com/xiashen/TGCA')
