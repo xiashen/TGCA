@@ -1,0 +1,18 @@
+citHeader("If you use the TGCA package, please cite:")
+
+citEntry(entry="Article",
+         title = "Total genetic contribution assessment of the human genome",
+         author = personList(as.person("Ting Li"),
+                             as.person("..."),
+                             as.person("Zheng Ning"),
+                             as.person("Xia Shen")),
+         journal      = "Submitted",
+         year         = "2020",
+         volume       = "0",
+         number       = "0",
+         pages        = "0-0",
+         url          = "https://...",
+         
+         textVersion = 
+         paste("Li, T., ..., Ning, Z. & Shen, X. Total genetic contribution assessment of the human genome. Submitted (2020).")
+)

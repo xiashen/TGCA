@@ -1,0 +1,12 @@
+Package: TGCA
+Type: Package
+Title: Total genetic contribution assessment
+Version: 1.0-0
+Date: 2020-12-18
+Author: Ting Li, Xia Shen
+Maintainer: Xia Shen <shenxia911@gmail.com>
+Description: This package implements the genome screening of total genetic contribution assessment (TGCA) based on mixture modeling.
+Depends: R (>= 2.10)
+License: GPL-3
+Imports: svMisc, mixtools, numDeriv
+RoxygenNote: 7.0.2
