@@ -5,11 +5,11 @@ Total genetic contribution assessment (TGCA) based on genome-wide summary associ
 ## Statistical Modeling
 The TGCA analysis models the Z statistics from genome-wide association studies (GWAS) for each single genetic variant as drawn from a mixture of:
 
-![](http://www.sciweavers.org/upload/Tex2Img_1595584297/eqn.png)
+![](http://www.shen.se/TGCA/tgca1.png)
 
 and thereafter makes inference on the TGCA parameter:
 
-![](http://www.sciweavers.org/upload/Tex2Img_1595584489/eqn.png)
+![](http://www.shen.se/TGCA/tgca2.png)
 
 assessing the total genetic contribution of the variant on the analyzed set of phenotypes.
 
@@ -61,6 +61,14 @@ The matrix of GWAS Z-scores can be decorrelated via:
 decor <- TGCA.decorrelate(tstat, N, MAF)
 ```
 which uses all the SNPs with MAF < 5e-4 to estimate the phenotypic correlations (See also `?TGCA.decorrelate`). The returned object `decor` is a list with two elements, where `z.decorrelated` is the decorrelated Z-score matrix, and the number of columns was determined so that the eigenvectors therein capture 90% information of the original Z-score matrix. The `cor.pheno` element gives the estimated phenotypic correlation matrix.
+```{r}
+image(cor(decor$z.decorrelated))
+```
+![](http://www.shen.se/TGCA/tgca.decor.png)
+```{r}
+image(decor$cor.pheno)
+```
+![](http://www.shen.se/TGCA/tgca.cor.png)
 
 ### Total genetic contribution assessment across the SNPs
 
