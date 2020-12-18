@@ -2,7 +2,7 @@
 Total genetic contribution assessment (TGCA) based on genome-wide summary association statistics.
 
 
-### Statistical Modeling
+## Statistical Modeling
 The TGCA analysis models the Z statistics from genome-wide association studies (GWAS) for each single genetic variant as drawn from a mixture of:
 
 ![](http://www.sciweavers.org/upload/Tex2Img_1595584297/eqn.png)
@@ -13,96 +13,84 @@ and thereafter makes inference on the TGCA parameter:
 
 assessing the total genetic contribution of the variant on the analyzed set of phenotypes.
 
-### Setup
-In order to perform a TGCA analysis in **R**, we recommend installing the **mixtools** package:
+## Setup
+Start by installing the **TGCA** R package. We recommend directly install from GitHub via:
 ```{r}
-install.packages('mixtools')
+require(devtools)
+install_github('https://github.com/xiashen/TGCA')
 ```
-for mixture model fitting and the **numDeriv** package:
+The installation should normally take less than 1 minute, as long as the internet connection has a reasonable speed. Then the package can be loaded via:
 ```{r}
-install.packages('numDeriv')
+require(TGCA)
 ```
-for standard error calculation.
-
-### Example
-
-The link to our whole-genome TGCA analysis results is provided in our paper. 
-Here using the top SNPs of the two loci _HLA-B_ and _SSH2_, we show how the TGCA inference can be reproduced based on [UK Biobank GWAS results by the Neale's lab](http://www.nealelab.is/uk-biobank).
-Example files are available at this GitHub repository.
-
-To simplify the example, we directly provide the first 200 eigenvectors of the estimated phenotypic correlation matrix of 1,376 UK Biobank phenotypes:
+or
 ```{r}
-L <- readRDS('R-0.5_matrix.rds')
-```
-which can be used to adjust for the phenotypic correlations across the Z statistics before mixture modeling:
-```{r}
-Z <- as.matrix(readRDS('HLA_SSH2_1376z.rds'))
-Zstar <- Z %*% L
-```
-The `L` matrix can be applied to any variant in the genome for the 1,376 phenotypes. Now we apply the mixture model to the `Zstar` values for the _HLA-B_ locus: 
-```{r}
-require(mixtools)
-m1 <- normalmixEM(Zstar['6:31321915:A:G',], lambda = c(.25, .5, .25), mu = c(-1, 0, 1), sigma = c(2, 1, 2), 
-                  mean.constr = c(NA, 0, NA), sd.constr = c(NA, 1, NA), maxit = 9999)
-```
-The proportions of mixtures, ![](http://www.sciweavers.org/upload/Tex2Img_1595589650/eqn.png), are estimated as:
-```{r}
-m1$lambda
-## [1] 0.19730629 0.49617946 0.30651425
-```
-and the means and variances of genetic effects as:
-```{r}
-m1$mu[-2]
-## [1] -2.4391990  2.6229547
-m1$sigma[-2]
-## [1] 0.72591854 1.20545231
-```
-So that the TGCA parameter is:
-```{r}
-sum(abs(m1$lambda[-2]*m1$mu[-2]))
-## [1] 1.2852423
+library(TGCA)
 ```
 
-The standard error of these parameters can be derived from the log-likelihood of the mixture distribution:
-```{r}
-mixture.loglik <- function(param, X = m1$x) {
-    lambda <- param[1:3]
-    mu <- param[c(4,5)]
-    sigma <- param[c(6,7)]
-    L = matrix(NA, nrow = length(X), ncol = 3)
-    L[,1] = dnorm(X, mean = mu[1], sd = sigma[1])
-    L[,2] = dnorm(X, mean = 0, sd = 1)
-    L[,3] = dnorm(X, mean = mu[2], sd = sigma[2])
-    L[,1] = L[,1]*lambda[1]
-    L[,2] = L[,2]*lambda[2]
-    L[,3] = L[,3]*lambda[3]
-    return(sum(log(rowSums(L))))
-}
-```
-where `param` is the vector containing the seven parameters in the model. The standard errors are derived as:
-```{r}
-require(numDeriv)
-param <- c(m1$lambda, m1$mu[-2], m1$sigma[-2])
-H <- hessian(mixture.loglik, param)
-se <- sqrt(diag(solve(-H)))
-```
-Approximating the standard error of the TGCA parameter via Delta method, we have:
-```{r}
-vXY <- function(mX, mY, vX, vY) mX**2*vY + mY**2*vX + vX*vY
-sqrt(vXY(m1$lambda[1], m1$mu[1], se[1]**2, se[4]**2) + vXY(m1$lambda[3], m1$mu[3], se[3]**2, se[5]**2))
-## [1] 0.21734431
-```
-and the Wald test p-value of:
-```{r}
-pchisq(1.2852423**2/0.21734431**2, 1, lower.tail = FALSE)
-## [1] 3.3513147e-09
-```
+## Example
 
-### Reference
+### Decorrelation of the phenotypic correlations estimated via GWAS summary statistics
+
+In the R package, there is an embedded example dataset, which can be loaded as:
+```{r}
+data(tgca)
+```
+Once loaded, three objects exist in the working space: `tstat`, `MAF`, and `N`, which contain a matrix of GWAS Z-scores for 1,996 SNPs and 122 traits, minor allele frequencies of these SNPs, and the sample sizes of these phenotypes (See also `?tgca`). Such data are mandatory, where the low-MAF SNPs will be used for a good estimate of the phenotypic correlation matrix based on the GWAS Z-scores (Shen et al. 2020). `N` is used for determining the weight on each phenotype, to avoid total genetic contribution assessment being dominated by a few powerful GWASed traits. 
+```{r}
+tstat[1:5,1:5]
+##                    134        135 2966_irnt 3761_irnt      2443
+## rs375826246 -0.5767310  1.7772500  0.585063  0.885373  1.076920
+## rs117619944  1.0435500  0.0123881 -1.835130  0.279999  1.144640
+## rs1789089   -0.7954500 -0.5381990  0.710191  0.209710 -0.295909
+## rs186756650 -2.9892300  1.0387600 -1.111360 -1.022240  0.123447
+## rs1789088   -0.0372302 -1.1471900 -0.222836 -0.486009 -0.767688
+```
+```{r}
+head(MAF)
+## rs375826246 rs117619944   rs1789089 rs186756650   rs1789088   rs1789087
+##  0.00404353  0.03348060  0.48774500  0.00256649  0.05275140  0.34970100
+```
+```{r}
+head(N)
+##      134       135 2966_irnt 3761_irnt      2443      2453
+##   361136    361141     87024     72232    360192    359981
+```
+The matrix of GWAS Z-scores can be decorrelated via:
+```{r}
+decor <- TGCA.decorrelate(tstat, N, MAF)
+```
+which uses all the SNPs with MAF < 5e-4 to estimate the phenotypic correlations (See also `?TGCA.decorrelate`). The returned object `decor` is a list with two elements, where `z.decorrelated` is the decorrelated Z-score matrix, and the number of columns was determined so that the eigenvectors therein capture 90% information of the original Z-score matrix. The `cor.pheno` element gives the estimated phenotypic correlation matrix.
+
+### Total genetic contribution assessment across the SNPs
+
+With the decorrelated Z-score matrix, we can apply the TGCA mixture model on each of the SNP with MAF > 5e-4 across the included set of phenotypes:
+```{r}
+idx <- which(MAF < 5e-4)
+zmat <- decor$z.decorrelated[-idx,]
+res <- TGCA.scan(zmat)
+```
+This will take 2-3 minutes to complete. The returned result object `res` is a data frame, containing the estimated TGCA statistic `$theta` and every individual parameter in the mixture model. Additional columns in the same data frame provide the corresponding standard errors and p-values. Note that we emphasise the use of TGCA statistic `$theta` itself rather than its statistical inference based on the p-values.
+```{r}
+head(res)[,1:6]
+##                 theta.P   theta.est    theta.se         pi0.P       pi0.est     pi0.se
+## rs375826246 0.844227512 0.421103262 2.143140101 7.1202925e-01 4.8024344e-01 1.30100692
+## rs117619944 0.615133975 0.188594321 0.375119005 9.9999785e-01 4.1456785e-06 1.53765096
+## rs1789089   0.813586488 0.085283405 0.361674140 1.5681319e-03 7.5724755e-01 0.23950112
+## rs35305608  0.092087544 0.223738862 0.132823126 2.2767430e-01 3.8919665e-01 0.32261759
+## rs34783785  0.018746482 0.208043503 0.088509028 6.0087478e-05 5.8482376e-01 0.14575167
+## rs538737363 0.912468872 0.393878832 3.583160387 7.8154267e-01 5.1246755e-01 1.84800031
+```
+The link to our whole-genome TGCA analysis results for 5 different UK Biobank trait domains are provided in our paper (Li et al. 2020). 
+
+## Reference
 
 Li T, Ning Z, Yang Z, Zhai R, Xu W, Ying K, Wang Y, Chen Y, Shen X (2020). Total genetic contribution assessment across the human genome. _Submitted_.
 
-### Contact
+Shen X, Li T, Ning Z (2020). Improved estimation of phenotypic correlations using summary association statistics. on _bioRxiv_. https://www.biorxiv.org/content/10.1101/2020.12.10.419325v1
+
+
+## Contact
 
 If you have questions, please feel free to email xia (dot) shen (at) ed (dot) ac (dot) uk.
 
