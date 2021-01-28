@@ -93,7 +93,7 @@ The link to our whole-genome TGCA analysis results for 5 different UK Biobank tr
 
 ## Reference
 
-Li T, Yang Z, Zhai R, Xu W, Ying K, Wang Y, Chen Y, Ning Z, Shen X (2020). Total genetic contribution assessment across the human genome. _Submitted_.
+Li T, Ning Z, Yang Z, Zhai R, Xu W, Ying K, Wang Y, Chen Y, Shen X (2020). Total genetic contribution assessment across the human genome. _Submitted_.
 
 Li T, Ning Z, Shen X (2020). Improved estimation of phenotypic correlations using summary association statistics. on _bioRxiv_. https://www.biorxiv.org/content/10.1101/2020.12.10.419325v2
 
