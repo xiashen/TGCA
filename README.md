@@ -36,7 +36,7 @@ In the R package, there is an embedded example dataset, which can be loaded as:
 ```{r}
 data(tgca)
 ```
-Once loaded, three objects exist in the working space: `tstat`, `MAF`, and `N`, which contain a matrix of GWAS Z-scores for 1,996 SNPs and 122 traits, minor allele frequencies of these SNPs, and the sample sizes of these phenotypes (See also `?tgca`). Such data are mandatory, where the low-MAF SNPs will be used for a good estimate of the phenotypic correlation matrix based on the GWAS Z-scores (Shen et al. 2020). `N` is used for determining the weight on each phenotype, to avoid total genetic contribution assessment being dominated by a few powerful GWASed traits. 
+Once loaded, three objects exist in the working space: `tstat`, `MAF`, and `N`, which contain a matrix of GWAS Z-scores for 1,996 SNPs and 122 traits, minor allele frequencies of these SNPs, and the sample sizes of these phenotypes (See also `?tgca`). Such data are mandatory, the low-MAF SNPs will be used for a good estimate of the phenotypic correlation matrix based on the GWAS Z-scores (Shen et al. 2020). `N` is used for determining the weight on each phenotype, to avoid total genetic contribution assessment being dominated by a few powerful GWASed traits. The **rownames** of the `tstat` matrix are required, i.e., the SNP names.
 ```{r}
 tstat[1:5,1:5]
 ##                    134        135 2966_irnt 3761_irnt      2443
@@ -60,7 +60,7 @@ The matrix of GWAS Z-scores can be decorrelated via:
 ```{r}
 decor <- TGCA.decorrelate(tstat, N, MAF)
 ```
-which uses all the SNPs with MAF < 5e-4 to estimate the phenotypic correlations (See also `?TGCA.decorrelate`). The returned object `decor` is a list with two elements, where `z.decorrelated` is the decorrelated Z-score matrix, and the number of columns was determined so that the eigenvectors therein capture 90% information of the original Z-score matrix. The `cor.pheno` element gives the estimated phenotypic correlation matrix.
+which uses all the SNPs with MAF < 5e-4 to estimate the phenotypic correlations (See also `?TGCA.decorrelate`). If you don't have sufficient number of SNPs with such low MAFs, a MAF < 0.05 threshold is also fine for most analysis, which can be set via the argument `maf.cut = 0.05`. The returned object `decor` is a list with two elements, where `z.decorrelated` is the decorrelated Z-score matrix, and the number of columns was determined so that the eigenvectors therein capture 90% information of the original Z-score matrix. The `cor.pheno` element gives the estimated phenotypic correlation matrix.
 ```{r}
 image(cor(decor$z.decorrelated))
 ```
@@ -95,7 +95,7 @@ The link to our whole-genome TGCA analysis results for 5 different UK Biobank tr
 
 Li T, Ning Z, Yang Z, Zhai R, Xu W, Ying K, Wang Y, Chen Y, Shen X (2020). Total genetic contribution assessment across the human genome. _Nature Communications_, 12, 2845. https://www.nature.com/articles/s41467-021-23124-w
 
-Li T, Ning Z, Shen X (2020). Improved estimation of phenotypic correlations using summary association statistics. on _bioRxiv_. https://www.biorxiv.org/content/10.1101/2020.12.10.419325v2
+Li T, Ning Z, Shen X (2020). Improved estimation of phenotypic correlations using summary association statistics. _Frontiers in Genetics_, in press. On _bioRxiv_: https://www.biorxiv.org/content/10.1101/2020.12.10.419325v2
 
 
 ## Contact
